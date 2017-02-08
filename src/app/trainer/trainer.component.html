@@ -1,0 +1,17 @@
+<div>
+  <button (click)="train()">Train</button>
+  <div>{{biggestError}}</div>
+  <a href="#" id="link" download="example.json">
+    Download as JSON
+  </a>
+  <ul>
+    <li *ngFor="let color of colors">
+      <div class="color" [style.background-color]="color.hex"></div>
+      <div>Likes: {{color.likes}}</div>
+      <div>Hex: {{color.hex}}</div>
+      <div>Real: {{color.real}}</div>
+      <div>Result: {{color.result}}</div>
+      <div>Error: {{color.error}}</div>
+    </li>
+  </ul>
+</div>
