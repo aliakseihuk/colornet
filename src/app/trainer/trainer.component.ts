@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
+import * as Synaptic from "synaptic";
 
 import { Color } from './../color';
 import { ColorService } from './../color.service';
-import * as Synaptic from "synaptic";
+import { Network } from './../network';
 
 @Component({
   selector: 'app-trainer',
@@ -11,11 +12,12 @@ import * as Synaptic from "synaptic";
 })
 export class TrainerComponent implements OnInit {
   private colors: Color[] = [];
-  private maxVotes: number;
   private errorMessage: string;
-  private biggestError: number = 0;
+  
+  private network: Network = new Network();
+  private maxError: number;
 
-  constructor(private colorService: ColorService) { }
+  constructor(private colorService: ColorService) {}
 
   ngOnInit(): void {
     this.colorService.getColors()
@@ -25,36 +27,18 @@ export class TrainerComponent implements OnInit {
   }
 
   train(): void {
-    var perceptron = new Synaptic.Architect.Perceptron(3, 10, 10, 1);
-    let trainer = new Synaptic.Trainer(perceptron);
-    let maxLikes = Math.max(...this.colors.map(c => c.likes))
-    let set = this.colors.map(c => { return { input: [c.rgb.red / 255, c.rgb.green / 255, c.rgb.blue / 255], output: [c.likes / maxLikes] } });
-    console.log(set);
-    let options = {
-      rate: .05,
-      iterations: 50000,
-      error: .005,
-      shuffle: true,
-      log: 10000,
-      cost: Synaptic.Trainer.cost.CROSS_ENTROPY
-    }
-    let result = trainer.train(set, options);
-    console.log(result);
-
-    // console.log(perceptron.activate([0,0,0])[0]);
-    this.colors.forEach(element => {
-      element.real = element.likes / maxLikes;
-      element.result = perceptron.activate([element.rgb.red / 255, element.rgb.green / 255, element.rgb.blue / 255])[0];
-      element.error = Math.abs(element.result - element.real);
+    this.network.train(this.colors);
+    this.colors.forEach(color => {
+      color.computed = this.network.compute(color);
+      color.error = this.network.computeError(color);
     });
+    this.maxError = Math.max(...this.colors.map(c => c.error));
+  }
 
-    var exported = perceptron.toJSON();
-
-    var dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(exported));
-
-    //Write it as the href for the link
-    var link = document.getElementById('link').setAttribute('href', dataUri);
-
-    this.biggestError = Math.max(...this.colors.map(c => c.error));
+  download(): void {
+    var data = JSON.stringify(this.network.json);
+    var blob = new Blob([data], { type: 'application/json' });
+    var url= window.URL.createObjectURL(blob);
+    window.open(url);
   }
 }

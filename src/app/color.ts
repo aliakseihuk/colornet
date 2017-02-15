@@ -4,7 +4,7 @@ export class Color {
     public rgb: { red: number, green: number, blue: number },
     public likes: number,
     public real: number,
-    public result: number,
+    public computed: number,
     public error: number) {
   }
 }

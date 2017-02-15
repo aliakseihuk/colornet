@@ -9,6 +9,13 @@ ul {
 }
 
 .color {
-  width: 15em;
-  height: 5em;
+  height: 1.5em;
+  border: 1px solid black;
+}
+
+.control {
+  margin: 1em;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
