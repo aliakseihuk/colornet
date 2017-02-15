@@ -1,7 +1,9 @@
 <div class="control">
   <div>
     <button class="btn btn-secondary" (click)="train()">Train</button>
-    <button *ngIf="maxError !== undefinied" class="btn btn-secondary" (click)="download()">Download network as JSON</button>
+    <button *ngIf="maxError !== undefinied" class="btn btn-secondary" (click)="download()">Download</button>
+    <button class="btn btn-secondary" (click)="chooseFile()">Load</button>
+    <input id="networkLoad" type="file" (change)="load($event)" hidden/>
   </div>
   <h5 *ngIf="maxError !== undefinied"><span class="badge badge-danger">Error: {{maxError | percent:'1.1-1'}}</span></h5>
 </div>

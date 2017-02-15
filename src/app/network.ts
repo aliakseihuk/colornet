@@ -2,12 +2,22 @@ import * as Synaptic from "synaptic";
 import { Color } from './color';
 
 export class Network {
-  private perceptron: Synaptic.Architect.Perceptron;
+  private perceptron: Synaptic.Network;
   private limit: number;
 
   get json(): string {
-    if(this.perceptron)
-      return this.perceptron.toJSON();
+    if (this.perceptron) {
+      return JSON.stringify({
+        limit: this.limit,
+        perceptron: this.perceptron.toJSON()
+      });
+    }
+  }
+
+  set json(value: string) {
+    let imported: { limit: number, perceptron } = JSON.parse(value);
+    this.limit = imported.limit;
+    this.perceptron = Synaptic.Network.fromJSON(imported.perceptron)
   }
 
   public train(colors: Color[]) {
