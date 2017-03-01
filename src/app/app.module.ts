@@ -5,11 +5,13 @@ import { HttpModule, JsonpModule} from '@angular/http';
 
 import { AppComponent } from './app.component';
 import { TrainerComponent } from './trainer/trainer.component';
+import { ChartComponent } from './chart/chart.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    TrainerComponent
+    TrainerComponent,
+    ChartComponent
   ],
   imports: [
     BrowserModule,

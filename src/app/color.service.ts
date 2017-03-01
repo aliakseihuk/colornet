@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Http, Jsonp, Response } from '@angular/http';
- 
-import { Color } from './color';
+
+import { Color, ColorData } from './color';
 import { COLORS } from './colors';
 
 import { Observable } from 'rxjs/Observable';
@@ -16,25 +16,31 @@ export class ColorService {
 
   constructor(private jsonp: Jsonp) { }
 
-  getColors(): Observable<Color[]> {
-    // const requestCount: number = 1;
-    // let requests: Observable<Response>[] = [];
-    // for(let i = 0; i < requestCount; ++i) {
-    //   requests.push(this.jsonp.get(this.colorsUrl + `&resultOffset=${i}00`));
-    // }
-    // return requests
-    //   .reduce((p, c) => p.concat(c))
-    //   .map(this.extractData)
-    //   .catch(this.handleError);
-    
-    var observable = Observable.create(function (observer) {
-        observer.next(COLORS.map(c => new Color(`#${c.hex}`, c.rgb, c.numVotes, 0, 0, 0)));
-    });
-    return <Observable<Color[]>>observable;
+  getColors(): Observable<ColorData[]> {
+    const requestCount: number = 1;
+    let requests: Observable<Response>[] = [];
+    for (let i = 0; i < requestCount; ++i) {
+      requests.push(this.jsonp.get(this.colorsUrl + `&resultOffset=${i}00`));
+    }
+    return requests
+      .reduce((p, c) => p.concat(c))
+      .map(this.extractData)
+      .catch(this.handleError);
+
+    // let observable = Observable.create(function (observer) {
+    //     observer.next(COLORS.map(o => new ColorData(
+    //     new Color(`#${o.hex}`, { r: o.rgb.red, g: o.rgb.green, b: o.rgb.blue }),
+    //     o.numVotes, 0, 0)));
+    // });
+    // return <Observable<ColorData[]>>observable;
   }
 
-  private extractData(res: Response): Color[] {
-    return res.json().map(o => new Color(`#${o.hex}`, o.rgb, o.numVotes, 0, 0, 0));
+  private extractData(res: Response): ColorData[] {
+    return res.json()
+      .map(o => new ColorData(
+        new Color(`#${o.hex}`, { r: o.rgb.red, g: o.rgb.green, b: o.rgb.blue }),
+        o.numVotes, 0, 0)
+      );
   }
 
   private handleError(error: Response | any) {

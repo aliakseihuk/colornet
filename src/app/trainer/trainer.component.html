@@ -7,6 +7,7 @@
   </div>
   <h5 *ngIf="maxError !== undefinied"><span class="badge badge-danger">Error: {{maxError | percent:'1.1-1'}}</span></h5>
 </div>
+<app-chart *ngIf="chartData" [chartData]="chartData"></app-chart>
 <table class="table table-sm table-striped">
   <thead>
     <tr>
@@ -19,15 +20,15 @@
     </tr>
   </thead>
   <tbody>
-    <tr *ngFor="let color of colors; let i = index">
+    <tr *ngFor="let data of colorsData; let i = index">
       <th scope="row">{{i + 1}}</th>
       <td>
-        <div class="color" [style.background-color]="color.hex"></div>
+        <div class="color" [style.background-color]="data.color.hex"></div>
       </td>
-      <td>{{color.hex}}</td>
-      <td>{{color.likes | number:'1.0-0'}}</td>
-      <td>{{color.computed | number:'1.0-0'}}</td>
-      <td>{{color.error | percent:'1.1-1'}}</td>
+      <td>{{data.color.hex}}</td>
+      <td>{{data.likes | number:'1.0-0'}}</td>
+      <td>{{data.computedLikes | number:'1.0-0'}}</td>
+      <td>{{data.error | percent:'1.1-1'}}</td>
     </tr>
   </tbody>
 </table>

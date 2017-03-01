@@ -1,18 +1,23 @@
 import { Component, OnInit } from '@angular/core';
 import * as Synaptic from "synaptic";
 
-import { Color } from './../color';
+import { Color, ColorData } from './../color';
 import { ColorService } from './../color.service';
 import { Network } from './../network';
+import { ChartData, ChartColorData } from '../chart/chart-data';
 
 @Component({
   selector: 'app-trainer',
   templateUrl: './trainer.component.html',
-  styleUrls: ['./trainer.component.css']
+  styleUrls: ['./trainer.component.css'],
+  providers: [ColorService]
 })
 export class TrainerComponent implements OnInit {
-  private colors: Color[] = [];
+  private colorsData: ColorData[] = [];
   private errorMessage: string;
+
+  private chartData: ChartData;
+  private chartTimer: NodeJS.Timer;
 
   private network: Network = new Network();
   private maxError: number;
@@ -22,12 +27,12 @@ export class TrainerComponent implements OnInit {
   ngOnInit(): void {
     this.colorService.getColors()
       .subscribe(
-      colors => this.colors = this.colors.concat(colors).sort((a, b) => b.likes - a.likes),
+      data => this.colorsData = this.colorsData.concat(data).sort((a, b) => b.likes - a.likes),
       error => this.errorMessage = <any>error);
   }
 
   train(): void {
-    this.network.train(this.colors);
+    this.network.train(this.colorsData);
     this.updateColorStatistic();
   }
 
@@ -36,10 +41,6 @@ export class TrainerComponent implements OnInit {
     var blob = new Blob([data], { type: 'application/json' });
     var url = window.URL.createObjectURL(blob);
     window.open(url);
-  }
-
-  chooseFile() {
-    document.getElementById("networkLoad").click();
   }
 
   load(event) {
@@ -60,10 +61,34 @@ export class TrainerComponent implements OnInit {
   }
 
   updateColorStatistic() {
-    this.colors.forEach(color => {
-      color.computed = this.network.compute(color);
-      color.error = this.network.computeError(color);
+    this.colorsData.forEach(cd => {
+      cd.computedLikes = this.network.computeColor(cd.color);
+      cd.error = this.network.computeError(cd);
     });
-    this.maxError = Math.max(...this.colors.map(c => c.error));
+    this.maxError = Math.max(...this.colorsData.map(c => c.error));
+    this.restartChartAnimation();
+  }
+
+  restartChartAnimation() {
+    if(this.chartTimer) {
+      clearInterval(this.chartTimer);
+    }
+    let blue = 0;
+    this.chartTimer = setInterval(() => {
+      this.drawChart(blue);
+      blue = (blue + 5) % 256;
+    }, 100);
+  }
+
+  drawChart(b: number) {
+    let data: ChartColorData[] = [];
+      const step = 5;
+      for(let r = 0; r <= 255; r += step) {
+        for(let g = 0; g <= 255; g += step) {
+          let color = Color.fromRgb(r, g, b);
+          data.push(new ChartColorData(color, this.network.computeColorNormalize(color)))
+        }
+      }
+      this.chartData = new ChartData(data);
   }
 }

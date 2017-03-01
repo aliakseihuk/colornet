@@ -1,5 +1,5 @@
 import * as Synaptic from "synaptic";
-import { Color } from './color';
+import { Color, ColorData } from './color';
 
 export class Network {
   private perceptron: Synaptic.Network;
@@ -20,13 +20,13 @@ export class Network {
     this.perceptron = Synaptic.Network.fromJSON(imported.perceptron)
   }
 
-  public train(colors: Color[]) {
-    this.perceptron = new Synaptic.Architect.Perceptron(3, 10, 10, 1);
+  public train(colors: ColorData[]) {
+    this.perceptron = new Synaptic.Architect.Perceptron(3, 5, 5, 1);
     let trainer = new Synaptic.Trainer(this.perceptron);
     this.limit = Math.max(...colors.map(c => c.likes));
     let set = colors.map(c => {
       return {
-        input: this.normalizeColor(c),
+        input: this.normalizeColor(c.color),
         output: [c.likes / this.limit]
       }
     });
@@ -44,20 +44,36 @@ export class Network {
     console.log(result);
   }
 
-  public compute(color: Color): number {
-    return this.perceptron ? this.perceptron.activate(this.normalizeColor(color))[0] * this.limit : 0;
+  public computeColor(color: Color): number {
+    return this.computeRgb(color.r, color.g, color.b);
   }
 
-  public computeError(color: Color): number {
-    return Math.abs(color.computed - color.likes) / this.limit;
+  public computeColorNormalize(color: Color): number {
+    return this.computeRgbNormalize(color.r, color.g, color.b);
+  }
+
+  public computeRgb(red: number, green: number, blue: number): number {
+    return this.computeRgbNormalize(red, green, blue) * this.limit;
+  }
+
+  private computeRgbNormalize(red: number, green: number, blue: number): number {
+    return this.perceptron ? this.perceptron.activate(this.normalizeRgb(red, green, blue))[0] : 0;
+  }
+
+  public computeError(colorData: ColorData): number {
+    return Math.abs(colorData.computedLikes - colorData.likes) / this.limit;
   }
 
   private normalizeColor(color: Color): number[] {
+    return this.normalizeRgb(color.r, color.g, color.b);
+  }
+
+  private normalizeRgb(red: number, green: number, blue: number): number[] {
     const max = 255;
     return [
-      color.rgb.red / max,
-      color.rgb.green / max,
-      color.rgb.blue / max
+      red / max,
+      green / max,
+      blue / max
     ];
   }
 }
